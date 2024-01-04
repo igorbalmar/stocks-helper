@@ -1,0 +1,9 @@
+#!/bin/bash
+export tickers=(TAEE11 BBSE3 AGRO3 BBAS3 ELET6 CPLE6 PSSA3)
+export BRAPI_TOKEN='cGMpUX5c5JWnLukB5KQbsU'
+export BRAPI_STOCK_URL='https://brapi.dev/api/quote'
+export BRAPI_SELIC_URL='https://brapi.dev/api/prime-rate'
+export BRAPI_INFLATION_URL='https://brapi.dev/api/v2/inflation'
+export BRAPI_CRYPTO_URL='https://brapi.dev/api/v2/crypto'
+export TELEGRAM_CHANNEL='-1002013770123'
+export NOTIFIER_ADDR='0.0.0.0:8080'
