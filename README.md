@@ -8,13 +8,17 @@ The main purpose of this software is to notify (right now, only via telegram) wh
 ---
 O propósito deste app é executar um serviço Docker que verificar de hora em hora e notifica (via telegram) quando uma ação entra em algum estado/condição que pode ser interessante avaliar.
 
-- Lista das ações a serem validadas. Exemplo:
-Arquivo tickers.env
+Variáveis de ambiente a serem configuradas:
+
+- Lista das ações a serem validadas. Ver exemplo em tickers.env
 - Token BRAPI
+
 BRAPI_TOKEN='brapi.dev-token'
 - ID do grupo ou canal no Telegram
+
 TELEGRAM_CHANNEL='-channel_number'
 - Endereço da API do Telegram (notifier) - por padrão escuta na porta 8080
+
 NOTIFIER_ADDR='ip.addr:8080'
 
 
