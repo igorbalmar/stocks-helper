@@ -22,6 +22,11 @@ func StockPrice(t string) StockData {
 	if err != nil {
 		log.Fatal("Falha no GET da url ", stockUrl)
 	}
+
+	if stock.StatusCode != 200 {
+		log.Fatalf("Erro na chamada do enpoint %s.\nVerifique se o token está correto ou se houve alterações no retorno", brApiStockEndpoint)
+	}
+
 	defer stock.Body.Close()
 	body, err := io.ReadAll(stock.Body)
 
@@ -46,9 +51,6 @@ func OportunityCheck() StockProps {
 		if rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
 			cotacao.Status = "Oportunidade de Compra!\nValor abaixo da mínima de 52 semanas!\n"
 			log.Println("Enviando mensagem de oportunidade de compra para", rec.Symbol)
-		} else if rec.RegularMarketPrice <= rec.TwoHundredDayAverage {
-			cotacao.Status = "Valor abaixo da média de 200 dias"
-			log.Println("Enviando mensagem de oportunidade para", rec.Symbol)
 		} else if rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
 			cotacao.Status = "Oportunidade de Venda!\nValor acima  da máxima de 52 semanas!\n"
 			log.Println("Enviando mensagem de oportunidade de venda para", rec.Symbol)
@@ -61,7 +63,7 @@ func OportunityCheck() StockProps {
 		cotacao.Hora = rec.RegularMarketTime
 		cotacao.Low52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekLow)
 		cotacao.High52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekHigh)
-		cotacao.Avg200 = fmt.Sprintf("%.2f", rec.TwoHundredDayAverage)
+		//cotacao.Avg200 = fmt.Sprintf("%.2f", rec.TwoHundredDayAverage)
 	}
 	return cotacao
 }
@@ -77,16 +79,16 @@ func PrepareStockPayload() *bytes.Buffer {
 	ticker := r.Ticker
 	low52 := r.Low52
 	high52 := r.High52
-	avg200 := r.Avg200
+	//avg200 := r.Avg200
 	status := r.Status
 
-	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\n200 avg: %s\nLast updated: %s",
+	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\nLast updated: %s",
 		ticker,
 		cotacao,
 		status,
 		high52,
 		low52,
-		avg200,
+		//avg200,
 		hora)
 
 	message := TelegramPost{
@@ -115,7 +117,7 @@ type StockProps struct {
 	Hora   time.Time
 	Low52  string
 	High52 string
-	Avg200 string
+	//Avg200 string
 	Status string
 }
 
