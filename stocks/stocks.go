@@ -14,7 +14,7 @@ import (
 
 func StockPrice(t string) StockData {
 	brApiToken := os.Getenv("BRAPI_TOKEN")
-	brApiStockEndpoint := os.Getenv("BRAPI_STOCK_URL")
+	brApiStockEndpoint := "https://brapi.dev/api/quote"
 	ticker := t
 	stockUrl := fmt.Sprintf("%s/%s?token=%s", brApiStockEndpoint, ticker, brApiToken)
 	stock, err := http.Get(stockUrl)
@@ -44,36 +44,24 @@ func OportunityCheck() StockProps {
 
 	for _, rec := range StockPrice(os.Args[1]).Data {
 		if rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
-			cotacao.Ticker = rec.Symbol
-			cotacao.Price = fmt.Sprintf("%s %f", rec.Currency, rec.RegularMarketPrice)
-			cotacao.Hora = rec.RegularMarketTime
-			cotacao.Low52 = fmt.Sprintf("%f", rec.FiftyTwoWeekLow)
-			cotacao.High52 = fmt.Sprintf("%f", rec.FiftyTwoWeekHigh)
-			cotacao.Avg200 = fmt.Sprintf("%f", rec.TwoHundredDayAverage)
 			cotacao.Status = "Oportunidade de Compra!\nValor abaixo da mínima de 52 semanas!\n"
 			log.Println("Enviando mensagem de oportunidade de compra para", rec.Symbol)
 		} else if rec.RegularMarketPrice <= rec.TwoHundredDayAverage {
-			cotacao.Ticker = rec.Symbol
-			cotacao.Price = fmt.Sprintf("%s %f", rec.Currency, rec.RegularMarketPrice)
-			cotacao.Hora = rec.RegularMarketTime
-			cotacao.Low52 = fmt.Sprintf("%f", rec.FiftyTwoWeekLow)
-			cotacao.High52 = fmt.Sprintf("%f", rec.FiftyTwoWeekHigh)
-			cotacao.Avg200 = fmt.Sprintf("%f", rec.TwoHundredDayAverage)
 			cotacao.Status = "Valor abaixo da média de 200 dias"
 			log.Println("Enviando mensagem de oportunidade para", rec.Symbol)
 		} else if rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
-			cotacao.Ticker = rec.Symbol
-			cotacao.Price = fmt.Sprintf("%s %f", rec.Currency, rec.RegularMarketPrice)
-			cotacao.Hora = rec.RegularMarketTime
-			cotacao.Low52 = fmt.Sprintf("%f", rec.FiftyTwoWeekLow)
-			cotacao.High52 = fmt.Sprintf("%f", rec.FiftyTwoWeekHigh)
-			cotacao.Avg200 = fmt.Sprintf("%f", rec.TwoHundredDayAverage)
 			cotacao.Status = "Oportunidade de Venda!\nValor acima  da máxima de 52 semanas!\n"
 			log.Println("Enviando mensagem de oportunidade de venda para", rec.Symbol)
 		} else {
 			log.Println("Oportunidade não identificada para", rec.Symbol)
 			os.Exit(0)
 		}
+		cotacao.Ticker = rec.Symbol
+		cotacao.Price = fmt.Sprintf("%s %.2f", rec.Currency, rec.RegularMarketPrice)
+		cotacao.Hora = rec.RegularMarketTime
+		cotacao.Low52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekLow)
+		cotacao.High52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekHigh)
+		cotacao.Avg200 = fmt.Sprintf("%.2f", rec.TwoHundredDayAverage)
 	}
 	return cotacao
 }
@@ -92,21 +80,14 @@ func PrepareStockPayload() *bytes.Buffer {
 	avg200 := r.Avg200
 	status := r.Status
 
-	content := fmt.Sprintf(
-		"%s\n"+
-			"Update at %s\n"+
-			"%s\n"+
-			"%s\n"+
-			"High 52 weeks: %s\n"+
-			"Low 52 weeks: %s\n"+
-			"200 avg: %s",
-		status,
-		hora,
+	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\n200 avg: %s\nLast updated: %s",
 		ticker,
 		cotacao,
+		status,
 		high52,
 		low52,
-		avg200)
+		avg200,
+		hora)
 
 	message := TelegramPost{
 		Text:    content,
