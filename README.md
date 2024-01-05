@@ -1,11 +1,14 @@
 # stocks-helper
+
+The main purpose of this software is to notify (right now, only via telegram) when the specified stock is under specific conditions/price.
+
+---
+
 Use por sua própria conta e risco! Não é recomendação de compra nem venda de ações!
 
 Stocks helper, baseado na api https://brapi.dev
 
 
-The main purpose of this software is to notify (right now, only via telegram) when the specified stock is under specific conditions/price.
----
 O propósito deste app é executar um serviço Docker que verificar de hora em hora e notifica (via telegram) quando uma ação entra em algum estado/condição que pode ser interessante avaliar.
 
 Variáveis de ambiente a serem configuradas:
