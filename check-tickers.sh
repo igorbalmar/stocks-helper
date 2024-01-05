@@ -1,5 +1,6 @@
 #!/bin/bash
 source /usr/local/etc/stocks-helper/tickers.env
+sleep_time=1h
 if [[ -z ${tickers} || -z ${BRAPI_TOKEN} || -z ${TELEGRAM_CHANNEL} || -z ${NOTIFIER_ADDR} ]]
  then
  echo "Check if the environment variables are set accordingly!
@@ -12,6 +13,7 @@ while true
       do
         stocks-helper ${ticker} ${TELEGRAM_CHANNEL} ${NOTIFIER_ADDR}
     done
-    sleep 1h
+    echo "Sleeping for ${sleep_time}"
+    sleep ${sleep_time}
 done
 

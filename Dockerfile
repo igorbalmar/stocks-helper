@@ -11,7 +11,9 @@ COPY main.go .
 COPY tickers.env /usr/local/etc/stocks-helper/
 COPY check-tickers.sh /usr/local/bin/
 
-RUN go build -v -o /usr/local/bin/stocks-helper ./ && \
+RUN echo "TZ='America/Sao_Paulo'; export TZ" >> ~/.profile && \
+    . ~/.profile && \
+    go build -v -o /usr/local/bin/stocks-helper ./ && \
     chmod 0004  /usr/local/etc/stocks-helper/tickers.env && \
     chmod 0005 /usr/local/bin/stocks-helper /usr/local/bin/check-tickers.sh 
 
