@@ -50,15 +50,15 @@ func OportunityCheck() StockProps {
 
 	for _, rec := range StockPrice(os.Args[1]).Data {
 		if rec.FiftyTwoWeekHigh == 0 || rec.FiftyTwoWeekLow == 0 || rec.RegularMarketPrice == 0 {
-			log.Fatal("Sem dados para", rec.Symbol)
+			log.Fatal("Sem dados para ", rec.Symbol)
 		} else if rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
 			cotacao.Status = "Oportunidade de Compra!\nValor abaixo da mínima de 52 semanas!\n"
-			log.Println("Enviando mensagem de oportunidade de compra para", rec.Symbol)
+			log.Println("Enviando mensagem de oportunidade de compra para ", rec.Symbol)
 		} else if rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
 			cotacao.Status = "Oportunidade de Venda!\nValor acima  da máxima de 52 semanas!\n"
-			log.Println("Enviando mensagem de oportunidade de venda para", rec.Symbol)
+			log.Println("Enviando mensagem de oportunidade de venda para ", rec.Symbol)
 		} else {
-			log.Println("Oportunidade não identificada para", rec.Symbol)
+			log.Println("Oportunidade não identificada para ", rec.Symbol)
 			os.Exit(0)
 		}
 		cotacao.Ticker = rec.Symbol
