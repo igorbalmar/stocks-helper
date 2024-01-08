@@ -41,6 +41,7 @@ func StockPrice(t string) StockData {
 	if error != nil {
 		log.Fatal("Não foi possível tratar o JSON via json.Unmarshal:\n", error, "\nTicker: ", t)
 	}
+
 	return result
 }
 
@@ -48,7 +49,9 @@ func OportunityCheck() StockProps {
 	var cotacao StockProps
 
 	for _, rec := range StockPrice(os.Args[1]).Data {
-		if rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
+		if rec.FiftyTwoWeekHigh == 0 || rec.FiftyTwoWeekLow == 0 || rec.RegularMarketPrice == 0 {
+			log.Fatal("Sem dados para", rec.Symbol)
+		} else if rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
 			cotacao.Status = "Oportunidade de Compra!\nValor abaixo da mínima de 52 semanas!\n"
 			log.Println("Enviando mensagem de oportunidade de compra para", rec.Symbol)
 		} else if rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
