@@ -8,7 +8,6 @@ import (
 	stocks "stocks-helper/stocks"
 	tickers "stocks-helper/tickers"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -34,17 +33,17 @@ func main() {
 
 	stocksList := tickers.ReadTickersFromDB(dbString)
 	for _, stock := range stocksList {
-		log.Println("Checando ", stock.Ticker)
+		log.Println("Checando", stock.Ticker)
 		ret := stocks.GetStockPrice(stock.Ticker, stock.Watch, stock.Bought, brApiToken)
-		if strings.Contains(ret.Status, "Sem dados") || strings.Contains(ret.Status, "Oportunidade não identificada") {
-			log.Println(ret.Status)
-		} else {
+		if ret.Notify {
 			payload := stocks.PrepareStockPayload(ret, telegramGroupId)
 			resp, err := http.Post(notifierUrl+"/telegram", "application/json", payload)
 			if err != nil {
 				log.Fatal(err)
 			}
 			defer resp.Body.Close()
+		} else {
+			log.Println(ret.Status)
 		}
 	}
 }

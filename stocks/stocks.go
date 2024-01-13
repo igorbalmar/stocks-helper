@@ -42,15 +42,18 @@ func GetStockPrice(t string, w bool, b bool, token string) (cotacao StockProps) 
 	for _, rec := range result.Data {
 		if rec.FiftyTwoWeekHigh == 0 || rec.FiftyTwoWeekLow == 0 || rec.RegularMarketPrice == 0 {
 			cotacao.Status = "Dados insuficientes"
+			cotacao.Notify = false
 			log.Println("Sem dados para ", rec.Symbol)
 		} else if (w || b) && rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
 			cotacao.Status = "Oportunidade de Compra!\nValor abaixo da mínima de 52 semanas!\n"
+			cotacao.Notify = true
 			log.Println("Preparando payload para  ", rec.Symbol)
 		} else if b && rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
 			cotacao.Status = "Oportunidade de Venda!\nValor acima  da máxima de 52 semanas!\n"
+			cotacao.Notify = true
 			log.Println("Preparando payload para  ", rec.Symbol)
 		} else {
-			//cotacao.Status = "Oportunidade não identificada."
+			cotacao.Notify = false
 			log.Println("Oportunidade não identificada para  ", rec.Symbol)
 		}
 		cotacao.Ticker = rec.Symbol
@@ -58,23 +61,17 @@ func GetStockPrice(t string, w bool, b bool, token string) (cotacao StockProps) 
 		//cotacao.Hora = rec.RegularMarketTime
 		cotacao.Low52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekLow)
 		cotacao.High52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekHigh)
-		//cotacao.Avg200 = fmt.Sprintf("%.2f", rec.TwoHundredDayAverage)
 	}
 	return cotacao
 }
 
 func PrepareStockPayload(r StockProps, g int64) *bytes.Buffer {
 
-	//TelegramGroupId, _ := strconv.ParseInt(os.Args[2], 10, 64)
-
-	//r := OportunityCheck(t)
-
 	cotacao := r.Price
 	//hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
 	ticker := r.Ticker
 	low52 := r.Low52
 	high52 := r.High52
-	//avg200 := r.Avg200
 	status := r.Status
 	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\n",
 		ticker,
@@ -113,6 +110,7 @@ type StockProps struct {
 	High52 string
 	//Avg200 string
 	Status string
+	Notify bool
 }
 
 type StockData struct {
