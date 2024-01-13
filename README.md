@@ -14,7 +14,7 @@ O propósito deste app é executar um serviço Docker que verificar de hora em h
 # Variáveis de ambiente a serem configuradas:
 
 - STOCKS_DB_STRING
-Formato: "postgres://user:pass@dbname.host:port/app_name?sslmode=require"
+url exemplo = "postgres://username:password@localhost:5432/database_name"
 
 - BRAPI_TOKEN='brapi.dev-token'
 Token BRAPI
