@@ -9,7 +9,8 @@ RUN go mod download && go mod verify
 COPY . .
 COPY main.go .
 
-RUN export TZ='America/Sao_Paulo' && \
+RUN echo "TZ='America/Sao_Paulo'; export TZ" >> ~/.profile && \
+    . ~/.profile && \
     go build -v -o /usr/local/bin/stocks-helper
 
 CMD ["/usr/local/bin/stocks-helper"]
