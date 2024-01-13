@@ -11,23 +11,21 @@ Stocks helper, baseado na api https://brapi.dev
 
 O propósito deste app é executar um serviço Docker que verificar de hora em hora e notifica (via telegram) quando uma ação entra em algum estado/condição que pode ser interessante avaliar.
 
-Variáveis de ambiente a serem configuradas:
+# Variáveis de ambiente a serem configuradas:
 
-- Lista das ações a serem validadas. Ver exemplo em tickers.env
-- Token BRAPI
+- STOCKS_DB_STRING
+Formato: "postgres://user:pass@dbname.host:port/app_name?sslmode=require"
 
-BRAPI_TOKEN='brapi.dev-token'
-- ID do grupo ou canal no Telegram
+- BRAPI_TOKEN='brapi.dev-token'
+Token BRAPI
 
-TELEGRAM_CHANNEL='-channel_number'
-- Endereço da API do Telegram (notifier) - por padrão escuta na porta 8080
+- TELEGRAM_GROUP_ID
+ID do grupo ou canal no Telegram
 
-NOTIFIER_ADDR='ip.addr:8080'
+- NOTIFIER_ADDR='ip.addr:8080'
+Endereço da API do Telegram (notifier) - por padrão escuta na porta 8080
 
+# Atualizando/Cadastrando tickers
 
-# Atualizando tickers
-
-Caso queira atualizar somente os tickersações verificadas, substitua o arquivo tickers.env da imagem
-
-docker cp tickers.env container:/usr/local/etc/stocks-helper/tickers.env
+Ver db.sql em tickers/
 

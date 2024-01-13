@@ -7,13 +7,14 @@ if [[ -z ${tickers} || -z ${BRAPI_TOKEN} || -z ${TELEGRAM_CHANNEL} || -z ${NOTIF
  Mandatory: tickers(array), BRAPI_TOKEN, TELEGRAM_CHANNEL, NOTIFIER_ADDR"
  exit 1
 fi
-while true
-  do
-    for ticker in ${tickers[@]}
+
+
+watchTickers() {
+    for ticker in ${tickers[@]} ${wallet[@]}
       do
         stocks-helper ${ticker} ${TELEGRAM_CHANNEL} ${NOTIFIER_ADDR}
     done
     echo "Sleeping for ${sleep_time}"
     sleep ${sleep_time}
 done
-
+}
