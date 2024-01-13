@@ -8,8 +8,6 @@ RUN go mod download && go mod verify
 
 COPY stocks ./stocks
 COPY main.go .
-COPY tickers.env /usr/local/etc/stocks-helper/
-COPY check-tickers.sh /usr/local/bin/
 
 RUN echo "TZ='America/Sao_Paulo'; export TZ" >> ~/.profile && \
     . ~/.profile && \
