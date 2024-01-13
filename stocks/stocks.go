@@ -55,7 +55,7 @@ func GetStockPrice(t string, w bool, b bool, token string) (cotacao StockProps) 
 		}
 		cotacao.Ticker = rec.Symbol
 		cotacao.Price = fmt.Sprintf("%s %.2f", rec.Currency, rec.RegularMarketPrice)
-		cotacao.Hora = rec.RegularMarketTime
+		//cotacao.Hora = rec.RegularMarketTime
 		cotacao.Low52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekLow)
 		cotacao.High52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekHigh)
 		//cotacao.Avg200 = fmt.Sprintf("%.2f", rec.TwoHundredDayAverage)
@@ -70,20 +70,20 @@ func PrepareStockPayload(r StockProps, g int64) *bytes.Buffer {
 	//r := OportunityCheck(t)
 
 	cotacao := r.Price
-	hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
+	//hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
 	ticker := r.Ticker
 	low52 := r.Low52
 	high52 := r.High52
 	//avg200 := r.Avg200
 	status := r.Status
-	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\nLast updated: %s",
+	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\n",
 		ticker,
 		cotacao,
 		status,
 		high52,
-		low52,
-		//avg200,
-		hora)
+		low52)
+	//avg200,
+	//hora)
 
 	message := TelegramPost{
 		Text:    content,
@@ -108,7 +108,7 @@ type TelegramPost struct {
 type StockProps struct {
 	Ticker string
 	Price  string
-	Hora   time.Time
+	//Hora   time.Time
 	Low52  string
 	High52 string
 	//Avg200 string
