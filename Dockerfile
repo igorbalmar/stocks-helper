@@ -6,7 +6,7 @@ WORKDIR /usr/src/stocks-helper
 COPY go.mod ./
 RUN go mod download && go mod verify
 
-COPY stocks ./stocks
+COPY . .
 COPY main.go .
 
 RUN export TZ='America/Sao_Paulo' && \
