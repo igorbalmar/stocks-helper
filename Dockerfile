@@ -13,8 +13,6 @@ COPY check-tickers.sh /usr/local/bin/
 
 RUN echo "TZ='America/Sao_Paulo'; export TZ" >> ~/.profile && \
     . ~/.profile && \
-    go build -v -o /usr/local/bin/stocks-helper ./ && \
-    chmod 0004  /usr/local/etc/stocks-helper/tickers.env && \
-    chmod 0005 /usr/local/bin/stocks-helper /usr/local/bin/check-tickers.sh 
+    go build -v -o /usr/local/bin/stocks-helper
 
-CMD ["bash", "/usr/local/bin/check-tickers.sh"]
+CMD ["/usr/local/bin/stocks-helper"]
