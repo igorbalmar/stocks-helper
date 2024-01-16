@@ -7,11 +7,11 @@ import (
 	"os"
 	stocks "stocks-helper/stocks"
 	tickers "stocks-helper/tickers"
+
 	"strconv"
 )
 
 func main() {
-
 	notifierUrl := fmt.Sprintf("http://%s", os.Getenv("NOTIFIER_ADDR"))
 	dbString := os.Getenv("STOCKS_DB_STRING")
 	brApiToken := os.Getenv("BRAPI_TOKEN")
@@ -35,6 +35,7 @@ func main() {
 	for _, stock := range stocksList {
 		log.Println("Checando", stock.Ticker)
 		ret := stocks.GetStockPrice(stock.Ticker, stock.Watch, stock.Bought, brApiToken)
+
 		if ret.Notify {
 			payload := stocks.PrepareStockPayload(ret, telegramGroupId)
 			resp, err := http.Post(notifierUrl+"/telegram", "application/json", payload)

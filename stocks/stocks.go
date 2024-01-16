@@ -68,19 +68,21 @@ func GetStockPrice(t string, w bool, b bool, token string) (cotacao StockProps) 
 func PrepareStockPayload(r StockProps, g int64) *bytes.Buffer {
 
 	cotacao := r.Price
-	//hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
 	ticker := r.Ticker
 	low52 := r.Low52
 	high52 := r.High52
 	status := r.Status
-	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52 weeks: %s\nLow 52 weeks: %s\n",
+	avg200 := r.Avg200
+	hora := r.UpdatedAt
+	//hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
+	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52: %s\nLow 52: %s\nAvg 200: %s\n%s",
 		ticker,
 		cotacao,
 		status,
 		high52,
-		low52)
-	//avg200,
-	//hora)
+		low52,
+		avg200,
+		hora)
 
 	message := TelegramPost{
 		Text:    content,
@@ -103,49 +105,49 @@ type TelegramPost struct {
 }
 
 type StockProps struct {
-	Ticker string
-	Price  string
-	//Hora   time.Time
-	Low52  string
-	High52 string
-	//Avg200 string
-	Status string
-	Notify bool
+	Ticker    string
+	Price     string
+	UpdatedAt string
+	Low52     string
+	High52    string
+	Avg200    string
+	Status    string
+	Notify    bool
 }
 
 type StockData struct {
 	Data []struct {
-		Symbol                            string    `json:"symbol"`
-		Currency                          string    `json:"currency"`
-		TwoHundredDayAverage              float32   `json:"twoHundredDayAverage"`
-		TwoHundredDayAverageChange        float64   `json:"twoHundredDayAverageChange"`
-		TwoHundredDayAverageChangePercent float64   `json:"twoHundredDayAverageChangePercent"`
-		MarketCap                         int64     `json:"marketCap"`
-		ShortName                         string    `json:"shortName"`
-		LongName                          string    `json:"longName"`
-		RegularMarketChange               float64   `json:"regularMarketChange"`
-		RegularMarketChangePercent        float64   `json:"regularMarketChangePercent"`
-		RegularMarketTime                 time.Time `json:"regularMarketTime"`
-		RegularMarketPrice                float32   `json:"regularMarketPrice"`
-		RegularMarketDayHigh              float32   `json:"regularMarketDayHigh"`
-		RegularMarketDayRange             string    `json:"regularMarketDayRange"`
-		RegularMarketDayLow               float32   `json:"regularMarketDayLow"`
-		RegularMarketVolume               int       `json:"regularMarketVolume"`
-		RegularMarketPreviousClose        float64   `json:"regularMarketPreviousClose"`
-		RegularMarketOpen                 float64   `json:"regularMarketOpen"`
-		AverageDailyVolume3Month          int       `json:"averageDailyVolume3Month"`
-		AverageDailyVolume10Day           int       `json:"averageDailyVolume10Day"`
-		FiftyTwoWeekLowChange             float64   `json:"fiftyTwoWeekLowChange"`
-		FiftyTwoWeekLowChangePercent      float64   `json:"fiftyTwoWeekLowChangePercent"`
-		FiftyTwoWeekRange                 string    `json:"fiftyTwoWeekRange"`
-		FiftyTwoWeekHighChange            float64   `json:"fiftyTwoWeekHighChange"`
-		FiftyTwoWeekHighChangePercent     float64   `json:"fiftyTwoWeekHighChangePercent"`
-		FiftyTwoWeekLow                   float32   `json:"fiftyTwoWeekLow"`
-		FiftyTwoWeekHigh                  float32   `json:"fiftyTwoWeekHigh"`
-		PriceEarnings                     float64   `json:"priceEarnings"`
-		EarningsPerShare                  float64   `json:"earningsPerShare"`
-		Logourl                           string    `json:"logourl"`
-		UpdatedAt                         string    `json:"updatedAt"`
+		Symbol                            string  `json:"symbol"`
+		Currency                          string  `json:"currency"`
+		TwoHundredDayAverage              float32 `json:"twoHundredDayAverage"`
+		TwoHundredDayAverageChange        float64 `json:"twoHundredDayAverageChange"`
+		TwoHundredDayAverageChangePercent float64 `json:"twoHundredDayAverageChangePercent"`
+		MarketCap                         int64   `json:"marketCap"`
+		ShortName                         string  `json:"shortName"`
+		LongName                          string  `json:"longName"`
+		RegularMarketChange               float64 `json:"regularMarketChange"`
+		RegularMarketChangePercent        float64 `json:"regularMarketChangePercent"`
+		RegularMarketTime                 string  `json:"regularMarketTime"`
+		RegularMarketPrice                float32 `json:"regularMarketPrice"`
+		RegularMarketDayHigh              float32 `json:"regularMarketDayHigh"`
+		RegularMarketDayRange             string  `json:"regularMarketDayRange"`
+		RegularMarketDayLow               float32 `json:"regularMarketDayLow"`
+		RegularMarketVolume               int     `json:"regularMarketVolume"`
+		RegularMarketPreviousClose        float64 `json:"regularMarketPreviousClose"`
+		RegularMarketOpen                 float64 `json:"regularMarketOpen"`
+		AverageDailyVolume3Month          int     `json:"averageDailyVolume3Month"`
+		AverageDailyVolume10Day           int     `json:"averageDailyVolume10Day"`
+		FiftyTwoWeekLowChange             float64 `json:"fiftyTwoWeekLowChange"`
+		FiftyTwoWeekLowChangePercent      float64 `json:"fiftyTwoWeekLowChangePercent"`
+		FiftyTwoWeekRange                 string  `json:"fiftyTwoWeekRange"`
+		FiftyTwoWeekHighChange            float64 `json:"fiftyTwoWeekHighChange"`
+		FiftyTwoWeekHighChangePercent     float64 `json:"fiftyTwoWeekHighChangePercent"`
+		FiftyTwoWeekLow                   float32 `json:"fiftyTwoWeekLow"`
+		FiftyTwoWeekHigh                  float32 `json:"fiftyTwoWeekHigh"`
+		PriceEarnings                     float64 `json:"priceEarnings"`
+		EarningsPerShare                  float64 `json:"earningsPerShare"`
+		Logourl                           string  `json:"logourl"`
+		UpdatedAt                         string  `json:"updatedAt"`
 	} `json:"results"`
 	RequestedAt time.Time `json:"requestedAt"`
 	Took        string    `json:"took"`
