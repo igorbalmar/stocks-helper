@@ -15,7 +15,7 @@ RUN echo "TZ='America/Sao_Paulo'; export TZ" >> ~/.profile && \
     . ~/.profile && \
     go build -v -o stocks-helper
 
-FROM amazon/aws-lambda-go:latest
+FROM public.ecr.aws/lambda/go:latest
 
 COPY --from=build  /go/build/stocks-helper ${LAMBDA_TASK_ROOT}
 
