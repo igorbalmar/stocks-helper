@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func GetStockPrice(t string, w bool, b bool, token string) (cotacao StockProps) {
+func GetStockPrice(t string, w bool, b bool, target_b float32, token string) (cotacao StockProps) { //t is ticker, b stands for bought and w for watch
 	brApiStockEndpoint := "https://brapi.dev/api/quote"
 	ticker := t
 	stockUrl := fmt.Sprintf("%s/%s?token=%s", brApiStockEndpoint, ticker, token)
@@ -40,21 +40,24 @@ func GetStockPrice(t string, w bool, b bool, token string) (cotacao StockProps) 
 	}
 
 	for _, rec := range result.Data {
-		if rec.FiftyTwoWeekHigh == 0 || rec.FiftyTwoWeekLow == 0 || rec.RegularMarketPrice == 0 {
-			cotacao.Status = "Dados insuficientes"
+		if (w || b) && rec.FiftyTwoWeekLow != 0.00 && rec.RegularMarketPrice <= rec.FiftyTwoWeekLow { //b stands for bought and w for watch
+			cotacao.Status = rec.Symbol + " abaixo da mínima em 52 semanas!\n"
+			cotacao.Notify = true
+			log.Println("Preparando payload para  ", rec.Symbol)
+		} else if b && rec.FiftyTwoWeekHigh != 0.00 && rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
+			cotacao.Status = rec.Symbol + " acima da máxima em 52 semanas\n"
+			cotacao.Notify = true
+			log.Println("Preparando payload para  ", rec.Symbol)
+		} else if rec.RegularMarketPrice != 0.00 && target_b != 0 && rec.RegularMarketPrice <= target_b {
+			cotacao.Status = rec.Symbol + " está no valor definido para compra!"
+			cotacao.Notify = true
+		} else if rec.RegularMarketPrice == 0.00 {
+			cotacao.Status = "Dados insuficientes para " + rec.Symbol
 			cotacao.Notify = false
-			log.Println("Sem dados para ", rec.Symbol)
-		} else if (w || b) && rec.RegularMarketPrice <= rec.FiftyTwoWeekLow {
-			cotacao.Status = "Oportunidade de Compra!\nValor abaixo da mínima de 52 semanas!\n"
-			cotacao.Notify = true
-			log.Println("Preparando payload para  ", rec.Symbol)
-		} else if b && rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
-			cotacao.Status = "Oportunidade de Venda!\nValor acima  da máxima de 52 semanas!\n"
-			cotacao.Notify = true
-			log.Println("Preparando payload para  ", rec.Symbol)
+			log.Printf("%s\nCotação: %.2f\n52 High: %.2f\n52 Low: %.2f\n%s UTC", rec.Symbol, rec.RegularMarketPrice, rec.FiftyTwoWeekHigh, rec.FiftyTwoWeekLow, rec.UpdatedAt)
 		} else {
 			cotacao.Notify = false
-			log.Println("Oportunidade não identificada para  ", rec.Symbol)
+			log.Println("Oportunidade não identificada para", rec.Symbol)
 		}
 		cotacao.Ticker = rec.Symbol
 		cotacao.Price = fmt.Sprintf("%s %.2f", rec.Currency, rec.RegularMarketPrice)
@@ -75,7 +78,7 @@ func PrepareStockPayload(r StockProps, g int64) *bytes.Buffer {
 	avg200 := r.Avg200
 	hora := r.UpdatedAt
 	//hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
-	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52: %s\nLow 52: %s\nAvg 200: %s\n%s",
+	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52: %s\nLow 52: %s\nAvg 200: %s\n%s UTC",
 		ticker,
 		cotacao,
 		status,

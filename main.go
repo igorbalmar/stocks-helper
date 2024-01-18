@@ -34,7 +34,7 @@ func main() {
 	stocksList := tickers.ReadTickersFromDB(dbString)
 	for _, stock := range stocksList {
 		log.Println("Checando", stock.Ticker)
-		ret := stocks.GetStockPrice(stock.Ticker, stock.Watch, stock.Bought, brApiToken)
+		ret := stocks.GetStockPrice(stock.Ticker, stock.Watch, stock.Bought, stock.TargetBuy, brApiToken)
 
 		if ret.Notify {
 			payload := stocks.PrepareStockPayload(ret, telegramGroupId)
