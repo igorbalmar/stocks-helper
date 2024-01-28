@@ -52,3 +52,12 @@ INSERT INTO stocks.tickers(
 	id, ticker, watch, bought)
     -- id (sequence), ticker, watch (t,f), bought(t,f)
 	VALUES (nextval('tickers_id'), 'PETR4', true, false);
+
+
+-- adição campos de alvo de compra e venda
+ALTER TABLE IF EXISTS stocks.tickers
+    ADD COLUMN target_b real;
+
+ALTER TABLE IF EXISTS stocks.tickers
+    ADD COLUMN target_s real;
+    
