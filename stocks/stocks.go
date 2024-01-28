@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func GetStockPrice(t string, w bool, b bool, target_b float32, token string) (cotacao StockProps) { //t is ticker, b stands for bought and w for watch
+func GetStockPrice(t string, w bool, b bool, target_b float32, token string) (messageContent string, stockData StockProps) { //t is ticker, b stands for bought and w for watch
 	brApiStockEndpoint := "https://brapi.dev/api/quote"
 	ticker := t
 	stockUrl := fmt.Sprintf("%s/%s?token=%s", brApiStockEndpoint, ticker, token)
@@ -33,62 +33,61 @@ func GetStockPrice(t string, w bool, b bool, target_b float32, token string) (co
 
 	}
 
-	var result StockData
+	var result brApi
 	error := json.Unmarshal(body, &result)
 	if error != nil {
 		log.Fatalf("Não foi possível tratar o JSON via json.Unmarshal para %s\n%s", t, error)
 	}
 
-	for _, rec := range result.Data {
-		if (w || b) && rec.FiftyTwoWeekLow != 0.00 && rec.RegularMarketPrice <= rec.FiftyTwoWeekLow { //b stands for bought and w for watch
-			cotacao.Status = rec.Symbol + " abaixo da mínima em 52 semanas!\n"
-			cotacao.Notify = true
-			log.Println("Preparando payload para  ", rec.Symbol)
-		} else if b && rec.FiftyTwoWeekHigh != 0.00 && rec.RegularMarketPrice >= rec.FiftyTwoWeekHigh {
-			cotacao.Status = rec.Symbol + " acima da máxima em 52 semanas\n"
-			cotacao.Notify = true
-			log.Println("Preparando payload para  ", rec.Symbol)
-		} else if rec.RegularMarketPrice != 0.00 && target_b != 0 && rec.RegularMarketPrice <= target_b {
-			cotacao.Status = rec.Symbol + " está no valor definido para compra!"
-			cotacao.Notify = true
-		} else if rec.RegularMarketPrice == 0.00 {
-			cotacao.Status = "Dados insuficientes para " + rec.Symbol
-			cotacao.Notify = false
-			log.Printf("%s\nCotação: %.2f\n52 High: %.2f\n52 Low: %.2f\n%s UTC", rec.Symbol, rec.RegularMarketPrice, rec.FiftyTwoWeekHigh, rec.FiftyTwoWeekLow, rec.UpdatedAt)
+	for _, stock := range result.Data {
+		if (w || b) && stock.FiftyTwoWeekLow != 0.00 && stock.RegularMarketPrice <= stock.FiftyTwoWeekLow { //b stands for bought and w for watch
+			stockData.Status = stock.Symbol + " abaixo da mínima em 52 semanas!\n"
+			stockData.Notify = true
+			log.Println("Preparando payload para  ", stock.Symbol)
+		} else if b && stock.FiftyTwoWeekHigh != 0.00 && stock.RegularMarketPrice >= stock.FiftyTwoWeekHigh {
+			stockData.Status = stock.Symbol + " acima da máxima em 52 semanas\n"
+			stockData.Notify = true
+			log.Println("Preparando payload para  ", stock.Symbol)
+		} else if stock.RegularMarketPrice != 0.00 && target_b != 0 && stock.RegularMarketPrice <= target_b {
+			stockData.Status = stock.Symbol + " está no valor definido para compra!"
+			stockData.Notify = true
+		} else if stock.RegularMarketPrice == 0.00 {
+			stockData.Status = "Dados insuficientes para " + stock.Symbol
+			stockData.Notify = false
+			log.Printf("%s\nCotação: %.2f\n52 High: %.2f\n52 Low: %.2f\n%s UTC", stock.Symbol, stock.RegularMarketPrice, stock.FiftyTwoWeekHigh, stock.FiftyTwoWeekLow, stock.UpdatedAt)
 		} else {
-			cotacao.Notify = false
-			log.Println("Oportunidade não identificada para", rec.Symbol)
+			stockData.Notify = false
+			log.Println("Oportunidade não identificada para", stock.Symbol)
 		}
-		cotacao.Ticker = rec.Symbol
-		cotacao.Price = fmt.Sprintf("%s %.2f", rec.Currency, rec.RegularMarketPrice)
-		//cotacao.Hora = rec.RegularMarketTime
-		cotacao.Low52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekLow)
-		cotacao.High52 = fmt.Sprintf("%.2f", rec.FiftyTwoWeekHigh)
+		stockData.Ticker = stock.Symbol
+		stockData.Price = fmt.Sprintf("%s %.2f", stock.Currency, stock.RegularMarketPrice)
+		stockData.Low52 = fmt.Sprintf("%.2f", stock.FiftyTwoWeekLow)
+		stockData.High52 = fmt.Sprintf("%.2f", stock.FiftyTwoWeekHigh)
 	}
-	return cotacao
+	if stockData.Notify {
+		price := stockData.Price
+		symbol := stockData.Ticker
+		low52 := stockData.Low52
+		high52 := stockData.High52
+		status := stockData.Status
+		avg200 := stockData.Avg200
+		hora := stockData.UpdatedAt
+
+		messageContent = fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52: %s\nLow 52: %s\nAvg 200: %s\n%s UTC",
+			symbol,
+			price,
+			status,
+			high52,
+			low52,
+			avg200,
+			hora)
+	}
+	return messageContent, stockData
 }
 
-func PrepareStockPayload(r StockProps, g int64) *bytes.Buffer {
-
-	cotacao := r.Price
-	ticker := r.Ticker
-	low52 := r.Low52
-	high52 := r.High52
-	status := r.Status
-	avg200 := r.Avg200
-	hora := r.UpdatedAt
-	//hora := r.Hora.Local().Format("Mon Jan 02 15:04:05 2006")
-	content := fmt.Sprintf("%s - %s\n\n%s\n\nHigh 52: %s\nLow 52: %s\nAvg 200: %s\n%s UTC",
-		ticker,
-		cotacao,
-		status,
-		high52,
-		low52,
-		avg200,
-		hora)
-
+func PrepareTelegramPayload(s string, g int64) *bytes.Buffer { //receives string and the telegram group id, returning the payload
 	message := TelegramPost{
-		Text:    content,
+		Text:    s,
 		GroupId: g,
 	}
 	body, err := json.Marshal(message)
@@ -96,9 +95,7 @@ func PrepareStockPayload(r StockProps, g int64) *bytes.Buffer {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	payload := bytes.NewBuffer(body)
-
 	return payload
 }
 
@@ -118,7 +115,7 @@ type StockProps struct {
 	Notify    bool
 }
 
-type StockData struct {
+type brApi struct {
 	Data []struct {
 		Symbol                            string  `json:"symbol"`
 		Currency                          string  `json:"currency"`
