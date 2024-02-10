@@ -42,10 +42,13 @@ func main() {
 				log.Fatal(err)
 			}
 			defer resp.Body.Close()
-		} else {
-			messageContent := "Verificação executada com sucesso, sem decisões hoje..."
-			payload := stocks.PrepareTelegramPayload(messageContent, telegramGroupId)
-			http.Post(notifierUrl+"/telegram", "application/json", payload)
 		}
 	}
+	messageContent := "Verificação finalizada"
+	payload := stocks.PrepareTelegramPayload(messageContent, telegramGroupId)
+	resp, err := http.Post(notifierUrl+"/telegram", "application/json", payload)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 }
